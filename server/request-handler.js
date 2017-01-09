@@ -62,6 +62,7 @@ exports.requestHandler = function(request, response) {
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
 
+
   var body = [];
 
   request.on('error', function(err) {
@@ -69,7 +70,7 @@ exports.requestHandler = function(request, response) {
   }).on('data', function(chunk) {
     body.push(chunk);
   }).on('end', function() {
-    body = Buffer.concat(body).toString();
+    body.push('some string');
 
     response.on('error', function(err) {
       console.log(err);
@@ -82,9 +83,8 @@ exports.requestHandler = function(request, response) {
       headers: headers,
       method: request.method,
       url: request.url,
-      body: body
+      results: body
     };
-    console.log('this is the body', response.body);
 
     response.end(JSON.stringify(responseBody));  
   });
