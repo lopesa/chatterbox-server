@@ -48,11 +48,11 @@ exports.requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain';
+  headers['Content-Type'] = 'application/json';
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
+  //response.writeHead(statusCode, headers);
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -61,7 +61,34 @@ exports.requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('Hello, World!');
+
+  var body = [];
+
+  request.on('error', function(err) {
+    console.log(err);
+  }).on('data', function(chunk) {
+    body.push(chunk);
+  }).on('end', function() {
+    body = Buffer.concat(body).toString();
+
+    response.on('error', function(err) {
+      console.log(err);
+    });
+
+    response.statusCode = statusCode;
+    response.setHeader('Content-Type', 'application/json');
+
+    var responseBody = {
+      headers: headers,
+      method: request.method,
+      url: request.url,
+      body: body
+    };
+    console.log('this is the body', response.body);
+
+    response.end(JSON.stringify(responseBody));  
+  });
+
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
