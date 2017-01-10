@@ -11,14 +11,14 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
-var request = require('request');
+// var request = require('request');
 
 
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'access-control-allow-headers': 'content-type, accept',
-  'access-control-max-age': 10 // Seconds.
+  'access-control-max-age': 10, // Seconds.
 };
 
 var messages = [];
@@ -49,8 +49,10 @@ exports.requestHandler = function(request, response) {
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
   if (request.url === '/classes/messages') {
-
-    if (request.method === 'POST') {
+    if (request.method === 'OPTIONS') {
+      response.writeHead(200, defaultCorsHeaders);
+      response.end();
+    } else if (request.method === 'POST') {
       request.on('error', function(err) {
         console.log(err);
       }).on('data', data => {
@@ -64,8 +66,11 @@ exports.requestHandler = function(request, response) {
         response.on('error', function(err) {
           console.log(err);
         });
-        response.statusCode = 201;
-        response.setHeader('Content-Type', 'application/json');
+
+        response.writeHead(201, defaultCorsHeaders);
+
+        // response.statusCode = 201;
+        // response.setHeader('Content-Type', 'application/json');
 
         var responseBody = {
           message: 'message received'
@@ -84,8 +89,10 @@ exports.requestHandler = function(request, response) {
           console.log(err);
         });
 
-        response.statusCode = 200;
-        response.setHeader('Content-Type', 'application/json');
+        response.writeHead(200, defaultCorsHeaders);
+
+        // response.statusCode = 200;
+        // response.setHeader('Content-Type', 'application/json');
 
         var responseBody = {
           //headers: headers,
