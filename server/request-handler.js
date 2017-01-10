@@ -11,12 +11,21 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
+var request = require('request');
+
 
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'access-control-allow-headers': 'content-type, accept',
   'access-control-max-age': 10 // Seconds.
+};
+
+var messages = [];
+
+var Message = function(username, message) {
+  this.username = username;
+  this.message = message;
 };
 
 
@@ -37,6 +46,46 @@ exports.requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
+
+  if (request.method === 'POST') {
+    // console.log('44', Buffer.concat(request.results).toString());
+    // console.log(request);
+
+    request.on('error', function(err) {
+      console.log(err);
+    }).on('data', data => {
+        // data is in buffer form at this point
+
+      console.log(JSON.parse(data));
+      
+      var temp = JSON.parse(data);
+
+      var thisMessage = new Message(temp.username, temp.message);
+
+      messages.push(thisMessage);
+
+    }).on('end', function() {
+
+      response.on('error', function(err) {
+        console.log(err);
+      });
+
+      response.statusCode = 201;
+      response.setHeader('Content-Type', 'application/json');
+
+      var responseBody = {
+        message: 'message received'
+      };
+
+      response.end(JSON.stringify(responseBody));  
+
+    // do post stuff
+    /*request('classes/messages', function(error, response, body) {
+      if (!error && response.statusCode === 200) {
+        console.log(body);
+      }*/
+    });
+  }
 
   // The outgoing status.
   var statusCode = 200;
@@ -61,6 +110,8 @@ exports.requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
+
+
 
 
   var body = [];
