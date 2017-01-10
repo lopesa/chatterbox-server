@@ -48,24 +48,26 @@ exports.requestHandler = function(request, response) {
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
-  if (request.url === '/classes/messages') {
+  if (request.url === '/classes/messages' || request.url === '/classes/room') {
     if (request.method === 'OPTIONS') {
       response.writeHead(200, defaultCorsHeaders);
       response.end();
     } else if (request.method === 'POST') {
       request.on('error', function(err) {
         console.log(err);
-      }).on('data', data => {
+      });
+      request.on('data', data => {
         // data is in buffer form at this point
         var temp = JSON.parse(data);
         var thisMessage = new Message(temp.username, temp.message);
         messages.push(thisMessage);
 
-      }).on('end', function() {
+      });
+      request.on('end', function() {
 
-        response.on('error', function(err) {
-          console.log(err);
-        });
+        // response.on('error', function(err) {
+        //   console.log(err);
+        // });
 
         response.writeHead(201, defaultCorsHeaders);
 
@@ -80,14 +82,16 @@ exports.requestHandler = function(request, response) {
     } else if (request.method === 'GET') {
       request.on('error', function(err) {
         console.log(err);
-      }).on('data', function(chunk) {
+      });
+      request.on('data', function(chunk) {
         body.push(chunk);
-      }).on('end', function() {
-        body.push('some string');
+      });
+      request.on('end', function() {
+        //body.push('some string');
 
-        response.on('error', function(err) {
-          console.log(err);
-        });
+        // response.on('error', function(err) {
+        //   console.log(err);
+        // });
 
         response.writeHead(200, defaultCorsHeaders);
 
@@ -108,11 +112,14 @@ exports.requestHandler = function(request, response) {
   } else {
     request.on('error', function(err) {
       console.log(err);
-    }).on('data', function(chunk) {
+    });
+    request.on('data', function(chunk) {
       body.push(chunk);
-    }).on('end', function() {
-      response.statusCode = 404;
-      response.setHeader('Content-Type', 'application/json');
+    });
+    request.on('end', function() {
+      // response.statusCode = 404;
+      // response.writeHead('Content-Type', 'application/json');
+      response.writeHead(404, defaultCorsHeaders);
       var responseBody = {
         results: '404',
       };
