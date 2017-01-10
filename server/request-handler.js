@@ -22,6 +22,7 @@ var defaultCorsHeaders = {
 };
 
 var messages = [];
+var body = [];
 
 var Message = function(username, message) {
   this.username = username;
@@ -47,57 +48,87 @@ exports.requestHandler = function(request, response) {
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
-  if (request.method === 'POST') {
-    // console.log('44', Buffer.concat(request.results).toString());
-    // console.log(request);
+  if (request.url === '/classes/messages') {
 
+    if (request.method === 'POST') {
+      request.on('error', function(err) {
+        console.log(err);
+      }).on('data', data => {
+        // data is in buffer form at this point
+        var temp = JSON.parse(data);
+        var thisMessage = new Message(temp.username, temp.message);
+        messages.push(thisMessage);
+
+      }).on('end', function() {
+
+        response.on('error', function(err) {
+          console.log(err);
+        });
+        response.statusCode = 201;
+        response.setHeader('Content-Type', 'application/json');
+
+        var responseBody = {
+          message: 'message received'
+        };
+        response.end(JSON.stringify(responseBody));  
+      });
+    } else if (request.method === 'GET') {
+      request.on('error', function(err) {
+        console.log(err);
+      }).on('data', function(chunk) {
+        body.push(chunk);
+      }).on('end', function() {
+        body.push('some string');
+
+        response.on('error', function(err) {
+          console.log(err);
+        });
+
+        response.statusCode = 200;
+        response.setHeader('Content-Type', 'application/json');
+
+        var responseBody = {
+          //headers: headers,
+          method: request.method,
+          url: request.url,
+          results: messages
+        };
+
+        response.end(JSON.stringify(responseBody));  
+      });
+      
+    }
+  } else {
     request.on('error', function(err) {
       console.log(err);
-    }).on('data', data => {
-        // data is in buffer form at this point
-
-      console.log(JSON.parse(data));
-      
-      var temp = JSON.parse(data);
-
-      var thisMessage = new Message(temp.username, temp.message);
-
-      messages.push(thisMessage);
-
+    }).on('data', function(chunk) {
+      body.push(chunk);
     }).on('end', function() {
-
-      response.on('error', function(err) {
-        console.log(err);
-      });
-
-      response.statusCode = 201;
+      response.statusCode = 404;
       response.setHeader('Content-Type', 'application/json');
-
       var responseBody = {
-        message: 'message received'
+        results: '404',
       };
-
-      response.end(JSON.stringify(responseBody));  
-
-    // do post stuff
-    /*request('classes/messages', function(error, response, body) {
-      if (!error && response.statusCode === 200) {
-        console.log(body);
-      }*/
+      response.end(JSON.stringify(responseBody));
     });
+
+
+
+
   }
 
+
   // The outgoing status.
-  var statusCode = 200;
+  //var statusCode = 200;
 
   // See the note below about CORS headers.
-  var headers = defaultCorsHeaders;
+  //var headers = defaultCorsHeaders;
 
   // Tell the client we are sending them plain text.
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'application/json';
+  //headers['Content-Type'] = 'application/json';
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
@@ -114,31 +145,8 @@ exports.requestHandler = function(request, response) {
 
 
 
-  var body = [];
+  
 
-  request.on('error', function(err) {
-    console.log(err);
-  }).on('data', function(chunk) {
-    body.push(chunk);
-  }).on('end', function() {
-    body.push('some string');
-
-    response.on('error', function(err) {
-      console.log(err);
-    });
-
-    response.statusCode = statusCode;
-    response.setHeader('Content-Type', 'application/json');
-
-    var responseBody = {
-      headers: headers,
-      method: request.method,
-      url: request.url,
-      results: body
-    };
-
-    response.end(JSON.stringify(responseBody));  
-  });
 
 };
 
