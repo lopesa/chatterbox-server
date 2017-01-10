@@ -64,15 +64,7 @@ exports.requestHandler = function(request, response) {
 
       });
       request.on('end', function() {
-
-        // response.on('error', function(err) {
-        //   console.log(err);
-        // });
-
         response.writeHead(201, defaultCorsHeaders);
-
-        // response.statusCode = 201;
-        // response.setHeader('Content-Type', 'application/json');
 
         var responseBody = {
           message: 'message received'
@@ -87,19 +79,10 @@ exports.requestHandler = function(request, response) {
         body.push(chunk);
       });
       request.on('end', function() {
-        //body.push('some string');
-
-        // response.on('error', function(err) {
-        //   console.log(err);
-        // });
 
         response.writeHead(200, defaultCorsHeaders);
 
-        // response.statusCode = 200;
-        // response.setHeader('Content-Type', 'application/json');
-
         var responseBody = {
-          //headers: headers,
           method: request.method,
           url: request.url,
           results: messages
@@ -117,21 +100,14 @@ exports.requestHandler = function(request, response) {
       body.push(chunk);
     });
     request.on('end', function() {
-      // response.statusCode = 404;
-      // response.writeHead('Content-Type', 'application/json');
       response.writeHead(404, defaultCorsHeaders);
       var responseBody = {
         results: '404',
       };
       response.end(JSON.stringify(responseBody));
     });
-
-
-
-
   }
-
-
+};
   // The outgoing status.
   //var statusCode = 200;
 
@@ -157,12 +133,6 @@ exports.requestHandler = function(request, response) {
   // node to actually send all the data over to the client.
 
 
-
-
-  
-
-
-};
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
