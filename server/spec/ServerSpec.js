@@ -116,4 +116,41 @@ describe('Node Server Request Listener Function', function() {
       });
   });
 
+  it('Should send resonse from posts to /classes/room as "message received. Hal out, over."', function() {
+    var stubMsg = {
+      username: 'Jono',
+      message: 'Do my bidding!'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    // Expect 201 Created response status
+    expect(res._responseCode).to.equal(201);
+
+    // Testing for a newline isn't a valid test
+    // TODO: Replace with with a valid test
+    expect(JSON.parse(res._data)).to.equal('message received. Hal out, over.');
+    // expect(res._ended).to.equal(true);
+  });
+
+  it('should only accept post requests that are an object with only username message and room props', function() {
+    var stubMsg = {
+      hacker: 'dang!',
+      massage: 'Your security is thin'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(400);
+
+    // Testing for a newline isn't a valid test
+    // TODO: Replace with with a valid test
+    expect(JSON.parse(res._data)).to.equal('POST requests should have a username, message, and roomname');
+
+  });
+
 });
